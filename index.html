@@ -2,1317 +2,275 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>RivalStrike</title>
 
 <style>
 html,body{
-    margin:0;
-    width:100%;
-    height:100%;
-    overflow:hidden;
-    background:#111;
-    font-family:Arial,sans-serif;
+margin:0;width:100%;height:100%;overflow:hidden;
+background:#111;font-family:Arial;color:white
 }
+canvas{display:block;width:100%;height:100%}
 
-canvas{
-    display:block;
-    width:100%;
-    height:100%;
-}
+#hud{position:fixed;inset:0;pointer-events:none}
 
-#hud{
-    position:fixed;
-    inset:0;
-    pointer-events:none;
-    color:white;
+#info{
+position:absolute;left:20px;top:20px;
+background:#000b;padding:12px;border-radius:10px;
+line-height:1.5
 }
 
 #crosshair{
-    position:absolute;
-    left:50%;
-    top:50%;
-    transform:translate(-50%,-50%);
-    font-size:30px;
-    font-weight:bold;
-}
-
-#weaponName{
-    position:absolute;
-    right:25px;
-    bottom:80px;
-    font-size:25px;
-    font-weight:bold;
-}
-
-#ammo{
-    position:absolute;
-    right:25px;
-    bottom:45px;
-    font-size:20px;
-}
-
-#info{
-    position:absolute;
-    left:20px;
-    top:20px;
-    background:rgba(0,0,0,.65);
-    padding:12px;
-    border-radius:10px;
-    line-height:1.5;
+position:absolute;left:50%;top:50%;
+transform:translate(-50%,-50%);
+font-size:28px;font-weight:bold
 }
 
 #message{
-    position:absolute;
-    left:50%;
-    top:20px;
-    transform:translateX(-50%);
-    background:rgba(0,0,0,.7);
-    padding:10px 20px;
-    border-radius:10px;
-}
-
-#gun{
-    position:absolute;
-    right:10%;
-    bottom:0;
-    width:380px;
-    height:300px;
-}
-
-/* 3D-style AR */
-.ar{
-    position:absolute;
-    right:20px;
-    bottom:80px;
-    width:320px;
-    height:100px;
-    transform:rotate(-5deg);
-}
-
-.arBody{
-    position:absolute;
-    right:50px;
-    top:20px;
-    width:210px;
-    height:60px;
-    background:linear-gradient(145deg,#555,#151515);
-    border-radius:8px;
-    box-shadow:inset 0 5px 10px #777;
-}
-
-.arBarrel{
-    position:absolute;
-    right:-40px;
-    top:38px;
-    width:100px;
-    height:20px;
-    background:#090909;
-}
-
-.arMagazine{
-    position:absolute;
-    right:150px;
-    top:65px;
-    width:35px;
-    height:75px;
-    background:#222;
-    transform:rotate(12deg);
-    border-radius:5px;
-}
-
-.arGrip{
-    position:absolute;
-    right:85px;
-    top:65px;
-    width:30px;
-    height:70px;
-    background:#171717;
-    transform:rotate(15deg);
-}
-
-/* Handgun */
-.handgun{
-    position:absolute;
-    right:40px;
-    bottom:70px;
-    width:270px;
-    height:220px;
-}
-
-.slide{
-    position:absolute;
-    right:20px;
-    top:40px;
-    width:200px;
-    height:50px;
-    background:linear-gradient(145deg,#666,#171717);
-    border-radius:6px;
-}
-
-.handBarrel{
-    position:absolute;
-    right:-20px;
-    top:55px;
-    width:55px;
-    height:18px;
-    background:#080808;
-}
-
-.handGrip{
-    position:absolute;
-    right:80px;
-    top:85px;
-    width:48px;
-    height:110px;
-    background:#181818;
-    transform:rotate(12deg);
-    border-radius:5px;
-}
-
-/* Fists */
-.fists{
-    position:absolute;
-    right:50px;
-    bottom:20px;
-    width:300px;
-    height:220px;
-}
-
-.fist{
-    position:absolute;
-    width:110px;
-    height:105px;
-    background:linear-gradient(145deg,#d28a5c,#754329);
-    border:4px solid #4d2a1a;
-    border-radius:45%;
-}
-
-.fist1{
-    left:20px;
-    bottom:20px;
-    transform:rotate(-20deg);
-}
-
-.fist2{
-    right:10px;
-    bottom:10px;
-    transform:rotate(20deg);
-}
-
-/* Grenade */
-.grenade{
-    position:absolute;
-    right:120px;
-    bottom:60px;
-    width:80px;
-    height:120px;
-}
-
-.grenadeBody{
-    position:absolute;
-    bottom:0;
-    left:5px;
-    width:70px;
-    height:85px;
-    border-radius:45%;
-    background:radial-gradient(circle at 30% 25%,#687566,#182018);
-}
-
-.grenadeTop{
-    position:absolute;
-    left:27px;
-    top:10px;
-    width:30px;
-    height:30px;
-    background:#222;
-}
-
-.hidden{
-    display:none;
-}
-
-#hitmarker{
-    position:absolute;
-    left:50%;
-    top:50%;
-    transform:translate(-50%,-50%);
-    font-size:45px;
-    opacity:0;
-}
-
-.hit{
-    animation:hit .15s;
-}
-
-@keyframes hit{
-    0%{opacity:1}
-    100%{opacity:0}
-}
-</style>
-</head>
-
-<body>
-
-<canvas id="game"></canvas>
-
-<div id="hud">
-
-<div id="info">
-<b>RIVALSTRIKE</b><br>
-W A S D = Move<br>
-Mouse = Aim<br>
-Left Click = Shoot<br>
-R = Reload<br>
-1 = AR<br>
-2 = Handgun<br>
-3 = Fists<br>
-4 = Grenade
-</div>
-
-<div id="message">Ready!</div>
-
-<div id="crosshair">+</div>
-
-<div id="hitmarker">✕</div>
-
-<div id="weaponName">AR</div>
-<div id="ammo">30 / 30</div>
-
-<div id="gun">
-
-<div id="ar" class="ar">
-    <div class="arBody"></div>
-    <div class="arBarrel"></div>
-    <div class="arMagazine"></div>
-    <div class="arGrip"></div>
-</div>
-
-<div id="handgun" class="handgun hidden">
-    <div class="slide"></div>
-    <div class="handBarrel"></div>
-    <div class="handGrip"></div>
-</div>
-
-<div id="fists" class="fists hidden">
-    <div class="fist fist1"></div>
-    <div class="fist fist2"></div>
-</div>
-
-<div id="grenade" class="grenade hidden">
-    <div class="grenadeBody"></div>
-    <div class="grenadeTop"></div>
-</div>
-
-</div>
-</div>
-
-<script>
-
-/* =========================
-   CANVAS
-========================= */
-
-const canvas = document.getElementById("game");
-const ctx = canvas.getContext("2d");
-
-function resize(){
-    canvas.width=innerWidth;
-    canvas.height=innerHeight;
-}
-
-resize();
-addEventListener("resize",resize);
-
-
-/* =========================
-   PLAYER
-========================= */
-
-const player={
-    x:0,
-    y:0,
-    angle:0,
-    speed:4
-};
-
-const pressed={};
-
-addEventListener("keydown",e=>{
-    pressed[e.key.toLowerCase()]=true;
-
-    if(e.key==="1") equip(0);
-    if(e.key==="2") equip(1);
-    if(e.key==="3") equip(2);
-    if(e.key==="4") equip(3);
-    if(e.key.toLowerCase()==="r") reload();
-});
-
-addEventListener("keyup",e=>{
-    pressed[e.key.toLowerCase()]=false;
-});
-
-
-/* =========================
-   MOUSE
-========================= */
-
-addEventListener("mousemove",e=>{
-    player.angle += e.movementX*0.003;
-});
-
-addEventListener("click",()=>{
-    shoot();
-});
-
-
-/* =========================
-   WEAPONS
-========================= */
-
-const weapons=[
-    {
-        name:"AR",
-        ammo:30,
-        maxAmmo:30,
-        damage:25,
-        delay:120
-    },
-    {
-        name:"Handgun",
-        ammo:12,
-        maxAmmo:12,
-        damage:40,
-        delay:300
-    },
-    {
-        name:"Fists",
-        ammo:Infinity,
-        maxAmmo:Infinity,
-        damage:30,
-        delay:400
-    },
-    {
-        name:"Grenade",
-        ammo:3,
-        maxAmmo:3,
-        damage:100,
-        delay:800
-    }
-];
-
-let current=0;
-let ready=true;
-
-
-function equip(index){
-
-    current=index;
-
-    document.querySelector("#ar").classList.add("hidden");
-    document.querySelector("#handgun").classList.add("hidden");
-    document.querySelector("#fists").classList.add("hidden");
-    document.querySelector("#grenade").classList.add("hidden");
-
-    const ids=[
-        "ar",
-        "handgun",
-        "fists",
-        "grenade"
-    ];
-
-    document.querySelector("#"+ids[index])
-        .classList.remove("hidden");
-
-    updateHUD();
-
-    message("Equipped "+weapons[index].name);
-}
-
-
-function shoot(){
-
-    if(!ready)return;
-
-    const weapon=weapons[current];
-
-    if(weapon.ammo<=0){
-        message("OUT OF AMMO — PRESS R");
-        return;
-    }
-
-    ready=false;
-
-    if(weapon.ammo!==Infinity){
-        weapon.ammo--;
-    }
-
-    if(current===0 || current===1){
-        gunShot();
-    }
-
-    if(current===2){
-        punch();
-    }
-
-    if(current===3){
-        grenadeThrow();
-    }
-
-    updateHUD();
-
-    setTimeout(()=>{
-        ready=true;
-    },weapon.delay);
-}
-
-
-function reload(){
-
-    const weapon=weapons[current];
-
-    if(weapon.ammo===Infinity)return;
-
-    weapon.ammo=weapon.maxAmmo;
-
-    message("RELOADED");
-
-    updateHUD();
-}
-
-
-/* =========================
-   SHOOTING
-========================= */
-
-function gunShot(){
-
-    hitEnemy(weapons[current].damage);
-
-    const gun=document.querySelector(
-        current===0 ? "#ar" : "#handgun"
-    );
-
-    gun.style.transform="translateX(12px) rotate(-5deg)";
-
-    setTimeout(()=>{
-        gun.style.transform="";
-    },60);
-}
-
-
-function punch(){
-
-    message("PUNCH!");
-
-    for(const enemy of enemies){
-
-        if(!enemy.alive)continue;
-
-        const dx=enemy.x-player.x;
-        const dy=enemy.y-player.y;
-
-        const distance=Math.hypot(dx,dy);
-
-        if(distance<90){
-            enemy.health-=30;
-
-            if(enemy.health<=0){
-                enemy.alive=false;
-                message("+10 KEYS");
-            }
-        }
-    }
-}
-
-
-function grenadeThrow(){
-
-    message("BOOM!");
-
-    for(const enemy of enemies){
-
-        if(!enemy.alive)continue;
-
-        const dx=enemy.x-player.x;
-        const dy=enemy.y-player.y;
-
-        const distance=Math.hypot(dx,dy);
-
-        if(distance<250){
-            enemy.health-=100;
-
-            if(enemy.health<=0){
-                enemy.alive=false;
-            }
-        }
-    }
-}
-
-
-/* =========================
-   ENEMIES
-========================= */
-
-const enemies=[
-    {x:250,y:50,health:100,alive:true},
-    {x:-250,y:100,health:100,alive:true},
-    {x:100,y:-250,health:100,alive:true},
-    {x:-100,y:-300,health:100,alive:true}
-];
-
-
-function hitEnemy(damage){
-
-    let target=null;
-    let best=Infinity;
-
-    for(const enemy of enemies){
-
-        if(!enemy.alive)continue;
-
-        const dx=enemy.x-player.x;
-        const dy=enemy.y-player.y;
-
-        const distance=Math.hypot(dx,dy);
-
-        if(distance>500)continue;
-
-        const angle=Math.atan2(dy,dx);
-
-        let difference=angle-player.angle;
-
-        while(difference>Math.PI)
-            difference-=Math.PI*2;
-
-        while(difference<-Math.PI)
-            difference+=Math.PI*2;
-
-        if(Math.abs(difference)<0.12 && distance<best){
-
-            best=distance;
-            target=enemy;
-        }
-    }
-
-    if(target){
-
-        target.health-=damage;
-
-        showHit();
-
-        if(target.health<=0){
-            target.alive=false;
-            message("ELIMINATION!");
-        }else{
-            message("HIT -"+damage);
-        }
-    }
-}
-
-
-/* =========================
-   PLAYER MOVEMENT
-========================= */
-
-function movement(){
-
-    let x=0;
-    let y=0;
-
-    if(pressed.w){
-        x+=Math.cos(player.angle);
-        y+=Math.sin(player.angle);
-    }
-
-    if(pressed.s){
-        x-=Math.cos(player.angle);
-        y-=Math.sin(player.angle);
-    }
-
-    if(pressed.a){
-        x+=Math.cos(player.angle-Math.PI/2);
-        y+=Math.sin(player.angle-Math.PI/2);
-    }
-
-    if(pressed.d){
-        x+=Math.cos(player.angle+Math.PI/2);
-        y+=Math.sin(player.angle+Math.PI/2);
-    }
-
-    const length=Math.hypot(x,y);
-
-    if(length){
-
-        x/=length;
-        y/=length;
-
-        player.x+=x*player.speed;
-        player.y+=y*player.speed;
-    }
-}
-
-
-/* =========================
-   WORLD
-========================= */
-
-function drawWorld(){
-
-    ctx.clearRect(
-        0,
-        0,
-        canvas.width,
-        canvas.height
-    );
-
-    // sky
-    ctx.fillStyle="#202631";
-
-    ctx.fillRect(
-        0,
-        0,
-        canvas.width,
-        canvas.height/2
-    );
-
-    // floor
-    ctx.fillStyle="#34383d";
-
-    ctx.fillRect(
-        0,
-        canvas.height/2,
-        canvas.width,
-        canvas.height/2
-    );
-
-    // horizon
-    ctx.fillStyle="#111";
-
-    ctx.fillRect(
-        0,
-        canvas.height/2-3,
-        canvas.width,
-        6
-    );
-
-    // floor lines
-    ctx.strokeStyle="rgba(255,255,255,.08)";
-
-    for(let i=1;i<18;i++){
-
-        const y=
-            canvas.height/2+
-            Math.pow(i/18,1.7)*
-            canvas.height/2;
-
-        ctx.beginPath();
-        ctx.moveTo(0,y);
-        ctx.lineTo(canvas.width,y);
-        ctx.stroke();
-    }
-
-    drawEnemies();
-}
-
-
-/* =========================
-   ENEMY RENDERING
-========================= */
-
-function drawEnemies(){
-
-    for(const enemy of enemies){
-
-        if(!enemy.alive)continue;
-
-        const dx=enemy.x-player.x;
-        const dy=enemy.y-player.y;
-
-        const distance=Math.hypot(dx,dy);
-
-        if(distance<10)continue;
-
-        let angle=Math.atan2(dy,dx)-player.angle;
-
-        while(angle>Math.PI)
-            angle-=Math.PI*2;
-
-        while(angle<-Math.PI)
-            angle+=Math.PI*2;
-
-        if(Math.abs(angle)>0.8)continue;
-
-        const screenX=
-            canvas.width/2+
-            angle*canvas.width;
-
-        const size=Math.max(
-            25,
-            5000/distance
-        );
-
-        const bottom=
-            canvas.height/2+
-            10000/distance;
-
-        // body
-        ctx.fillStyle="#c93434";
-
-        ctx.fillRect(
-            screenX-size/3,
-            bottom-size,
-            size*.66,
-            size
-        );
-
-        // head
-        ctx.fillStyle="#d99570";
-
-        ctx.beginPath();
-
-        ctx.arc(
-            screenX,
-            bottom-size*1.15,
-            size*.28,
-            0,
-            Math.PI*2
-        );
-
-        ctx.fill();
-
-        // health bar
-        ctx.fillStyle="#111";
-
-        ctx.fillRect(
-            screenX-size/2,
-            bottom-size*1.55,
-            size,
-            7
-        );
-
-        ctx.fillStyle="#37db63";
-
-        ctx.fillRect(
-            screenX-size/2,
-            bottom-size*1.55,
-            size*(enemy.health/100),
-            7
-        );
-    }
-}
-
-
-/* =========================
-   HUD
-========================= */
-
-function updateHUD(){
-
-    const weapon=weapons[current];
-
-    document.querySelector("#weaponName")
-        .textContent=weapon.name;
-
-    document.querySelector("#ammo")
-        .textContent=
-        weapon.ammo===Infinity
-        ? "∞"
-        : weapon.ammo+" / "+weapon.maxAmmo;
-}
-
-
-function message(text){
-
-    const box=document.querySelector("#message");
-
-    box.textContent=text;
-
-    clearTimeout(message.timer);
-
-    message.timer=setTimeout(()=>{
-        box.textContent="RivalStrike";
-    },1000);
-}
-
-
-function showHit(){
-
-    const hit=document.querySelector("#hitmarker");
-
-    hit.classList.remove("hit");
-
-    void hit.offsetWidth;
-
-    hit.classList.add("hit");
-}
-
-
-/* =========================
-   GAME LOOP
-========================= */
-
-function gameLoop(){
-
-    movement();
-
-    drawWorld();
-
-    requestAnimationFrame(gameLoop);
-}
-
-
-equip(0);
-gameLoop();
-
-</script>
-
-</body>
-</html>
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>RivalStrike</title>
-
-<style>
-html,body{
-    margin:0;
-    width:100%;
-    height:100%;
-    overflow:hidden;
-    background:#111;
-    font-family:Arial,sans-serif;
-}
-
-canvas{
-    display:block;
-    width:100%;
-    height:100%;
-}
-
-#hud{
-    position:fixed;
-    inset:0;
-    pointer-events:none;
-    color:white;
-}
-
-#crosshair{
-    position:absolute;
-    left:50%;
-    top:50%;
-    transform:translate(-50%,-50%);
-    font-size:30px;
-    font-weight:bold;
+position:absolute;left:50%;top:20px;
+transform:translateX(-50%);
+background:#000c;padding:10px 20px;border-radius:10px
 }
 
 #weaponName{
-    position:absolute;
-    right:25px;
-    bottom:80px;
-    font-size:25px;
-    font-weight:bold;
+position:absolute;right:25px;bottom:80px;
+font-size:25px;font-weight:bold
 }
 
 #ammo{
-    position:absolute;
-    right:25px;
-    bottom:45px;
-    font-size:20px;
-}
-
-#info{
-    position:absolute;
-    left:20px;
-    top:20px;
-    background:rgba(0,0,0,.65);
-    padding:12px;
-    border-radius:10px;
-    line-height:1.5;
-}
-
-#message{
-    position:absolute;
-    left:50%;
-    top:20px;
-    transform:translateX(-50%);
-    background:rgba(0,0,0,.7);
-    padding:10px 20px;
-    border-radius:10px;
-}
-
-#hitmarker{
-    position:absolute;
-    left:50%;
-    top:50%;
-    transform:translate(-50%,-50%);
-    font-size:45px;
-    opacity:0;
-}
-
-.hit{
-    animation:hit .15s;
-}
-
-@keyframes hit{
-    0%{opacity:1}
-    100%{opacity:0}
-}
-
-/* CASE BUTTON */
-
-#caseButton{
-    position:absolute;
-    top:20px;
-    right:20px;
-    pointer-events:auto;
-    background:#7c3cff;
-    color:white;
-    border:0;
-    border-radius:10px;
-    padding:12px 18px;
-    font-size:16px;
-    font-weight:bold;
-    cursor:pointer;
+position:absolute;right:25px;bottom:45px;font-size:20px
 }
 
 #keys{
-    position:absolute;
-    top:72px;
-    right:25px;
-    font-size:18px;
-    font-weight:bold;
+position:absolute;right:20px;top:75px;
+font-size:18px;font-weight:bold
 }
+
+#caseButton{
+position:absolute;right:20px;top:20px;
+z-index:100;
+pointer-events:auto;
+background:#7c3cff;color:white;
+border:0;border-radius:10px;
+padding:12px 18px;font-weight:bold;
+cursor:pointer
+}
+
+#hitmarker{
+position:absolute;left:50%;top:50%;
+transform:translate(-50%,-50%);
+font-size:40px;opacity:0
+}
+
+.hit{animation:hit .15s}
+@keyframes hit{from{opacity:1}to{opacity:0}}
+
+#gun{
+position:absolute;right:10%;bottom:0;
+width:380px;height:300px
+}
+
+.ar{
+position:absolute;right:20px;bottom:80px;
+width:320px;height:100px;
+transform:rotate(-5deg)
+}
+
+.arBody{
+position:absolute;right:50px;top:20px;
+width:210px;height:60px;
+background:linear-gradient(145deg,#555,#151515);
+border-radius:8px
+}
+
+.arBarrel{
+position:absolute;right:-40px;top:38px;
+width:100px;height:20px;background:#090909
+}
+
+.arMagazine{
+position:absolute;right:150px;top:65px;
+width:35px;height:75px;background:#222;
+transform:rotate(12deg)
+}
+
+.arGrip{
+position:absolute;right:85px;top:65px;
+width:30px;height:70px;background:#171717;
+transform:rotate(15deg)
+}
+
+.handgun{
+position:absolute;right:40px;bottom:70px;
+width:270px;height:220px
+}
+
+.slide{
+position:absolute;right:20px;top:40px;
+width:200px;height:50px;
+background:linear-gradient(145deg,#666,#171717);
+border-radius:6px
+}
+
+.handBarrel{
+position:absolute;right:-20px;top:55px;
+width:55px;height:18px;background:#080808
+}
+
+.handGrip{
+position:absolute;right:80px;top:85px;
+width:48px;height:110px;
+background:#181818;transform:rotate(12deg);
+border-radius:5px
+}
+
+.fists{
+position:absolute;right:50px;bottom:20px;
+width:300px;height:220px
+}
+
+.fist{
+position:absolute;width:110px;height:105px;
+background:linear-gradient(145deg,#d28a5c,#754329);
+border:4px solid #4d2a1a;border-radius:45%
+}
+
+.fist1{left:20px;bottom:20px;transform:rotate(-20deg)}
+.fist2{right:10px;bottom:10px;transform:rotate(20deg)}
+
+.grenade{
+position:absolute;right:120px;bottom:60px;
+width:80px;height:120px
+}
+
+.grenadeBody{
+position:absolute;bottom:0;left:5px;
+width:70px;height:85px;border-radius:45%;
+background:radial-gradient(circle at 30% 25%,#687566,#182018)
+}
+
+.grenadeTop{
+position:absolute;left:27px;top:10px;
+width:30px;height:30px;background:#222
+}
+
+.hidden{display:none}
 
 /* CASE MENU */
 
+#caseMenu,#inventory,#opening{
+position:fixed;inset:0;
+z-index:1000;
+background:#080810f5;
+pointer-events:auto
+}
+
 #caseMenu{
-    display:none;
-    position:fixed;
-    inset:0;
-    background:rgba(5,5,12,.94);
-    z-index:20;
-    color:white;
-    text-align:center;
-    pointer-events:auto;
+display:none;text-align:center
 }
 
 #caseMenu h1{
-    margin-top:45px;
-    font-size:38px;
+margin-top:50px;font-size:38px
 }
 
-#caseBox{
-    margin:25px auto;
-    width:280px;
-    padding:25px;
-    border-radius:20px;
-    background:linear-gradient(145deg,#252535,#101015);
-    box-shadow:0 0 35px rgba(124,60,255,.4);
+.caseBox{
+width:300px;margin:30px auto;
+padding:25px;
+background:#20202c;
+border-radius:20px;
+box-shadow:0 0 30px #7c3cff66
 }
 
-#caseIcon{
-    font-size:90px;
-    margin:10px;
-}
+.caseIcon{font-size:90px}
 
-#caseName{
-    font-size:25px;
-    font-weight:bold;
-}
-
-#casePrice{
-    margin:10px;
-    color:#ffd84a;
+.casePrice{
+color:#ffd83d;
+margin:12px
 }
 
 .caseBtn{
-    border:0;
-    border-radius:10px;
-    padding:13px 22px;
-    margin:7px;
-    font-weight:bold;
-    cursor:pointer;
-    font-size:16px;
+padding:12px 20px;
+margin:5px;
+border:0;border-radius:9px;
+font-weight:bold;cursor:pointer
 }
 
-#openCase{
-    background:#7c3cff;
-    color:white;
-}
-
-#closeCase{
-    background:#333;
-    color:white;
-}
-
-#inventoryBtn{
-    background:#1687ff;
-    color:white;
-}
+.openBtn{background:#7c3cff;color:white}
+.inventoryBtn{background:#1687ff;color:white}
+.closeBtn{background:#444;color:white}
 
 /* OPENING */
 
 #opening{
-    display:none;
-    position:fixed;
-    inset:0;
-    z-index:30;
-    background:rgba(0,0,0,.96);
-    align-items:center;
-    justify-content:center;
-    flex-direction:column;
+display:none;
+align-items:center;
+justify-content:center;
+flex-direction:column
 }
 
 #openingCase{
-    font-size:120px;
-    animation:caseSpin 1s infinite alternate;
+font-size:110px;
+animation:spin 0.5s infinite alternate
 }
 
-@keyframes caseSpin{
-    from{transform:rotate(-8deg) scale(1)}
-    to{transform:rotate(8deg) scale(1.15)}
+@keyframes spin{
+from{transform:rotate(-10deg) scale(1)}
+to{transform:rotate(10deg) scale(1.15)}
 }
 
 #rolling{
-    margin-top:25px;
-    font-size:25px;
-    font-weight:bold;
+font-size:25px;margin-top:25px;
+font-weight:bold
 }
 
 /* INVENTORY */
 
 #inventory{
-    display:none;
-    position:fixed;
-    inset:0;
-    z-index:25;
-    background:rgba(8,8,15,.97);
-    color:white;
-    pointer-events:auto;
-    padding:35px;
-    overflow:auto;
+display:none;
+padding:30px;
+overflow:auto;
+box-sizing:border-box
 }
 
-#inventory h1{
-    text-align:center;
-}
+#inventory h1{text-align:center}
 
 #skinGrid{
-    display:flex;
-    flex-wrap:wrap;
-    justify-content:center;
-    gap:15px;
-    margin-top:25px;
+display:flex;
+flex-wrap:wrap;
+justify-content:center;
+gap:15px
 }
 
-.skinCard{
-    width:160px;
-    min-height:150px;
-    background:#20202b;
-    border-radius:15px;
-    padding:15px;
-    text-align:center;
+.skin{
+width:150px;
+padding:18px;
+background:#20202b;
+border-radius:15px;
+text-align:center
 }
 
-.skinIcon{
-    font-size:55px;
-}
+.skinIcon{font-size:55px}
 
-.skinCommon{
-    border:2px solid #aaa;
-}
+.common{border:2px solid #aaa}
+.rare{border:2px solid #438cff}
+.epic{border:2px solid #b43cff}
+.legendary{border:2px solid #ffd43b}
 
-.skinRare{
-    border:2px solid #5b8cff;
-}
-
-.skinEpic{
-    border:2px solid #b84cff;
-}
-
-.skinLegendary{
-    border:2px solid #ffd43b;
-}
-
-.equipSkin{
-    background:#1687ff;
-    color:white;
-    border:0;
-    padding:8px 12px;
-    border-radius:7px;
-    cursor:pointer;
+.equip{
+margin-top:10px;
+padding:8px 14px;
+border:0;border-radius:7px;
+background:#1687ff;color:white;
+cursor:pointer
 }
 
 #closeInventory{
-    display:block;
-    margin:20px auto;
-    background:#333;
-    color:white;
-    border:0;
-    border-radius:8px;
-    padding:12px 25px;
-    cursor:pointer;
-}
-
-/* GUN */
-
-#gun{
-    position:absolute;
-    right:10%;
-    bottom:0;
-    width:380px;
-    height:300px;
-}
-
-.ar{
-    position:absolute;
-    right:20px;
-    bottom:80px;
-    width:320px;
-    height:100px;
-    transform:rotate(-5deg);
-}
-
-.arBody{
-    position:absolute;
-    right:50px;
-    top:20px;
-    width:210px;
-    height:60px;
-    background:linear-gradient(145deg,#555,#151515);
-    border-radius:8px;
-    box-shadow:inset 0 5px 10px #777;
-}
-
-.arBarrel{
-    position:absolute;
-    right:-40px;
-    top:38px;
-    width:100px;
-    height:20px;
-    background:#090909;
-}
-
-.arMagazine{
-    position:absolute;
-    right:150px;
-    top:65px;
-    width:35px;
-    height:75px;
-    background:#222;
-    transform:rotate(12deg);
-    border-radius:5px;
-}
-
-.arGrip{
-    position:absolute;
-    right:85px;
-    top:65px;
-    width:30px;
-    height:70px;
-    background:#171717;
-    transform:rotate(15deg);
-}
-
-.handgun{
-    position:absolute;
-    right:40px;
-    bottom:70px;
-    width:270px;
-    height:220px;
-}
-
-.slide{
-    position:absolute;
-    right:20px;
-    top:40px;
-    width:200px;
-    height:50px;
-    background:linear-gradient(145deg,#666,#171717);
-    border-radius:6px;
-}
-
-.handBarrel{
-    position:absolute;
-    right:-20px;
-    top:55px;
-    width:55px;
-    height:18px;
-    background:#080808;
-}
-
-.handGrip{
-    position:absolute;
-    right:80px;
-    top:85px;
-    width:48px;
-    height:110px;
-    background:#181818;
-    transform:rotate(12deg);
-    border-radius:5px;
-}
-
-.fists{
-    position:absolute;
-    right:50px;
-    bottom:20px;
-    width:300px;
-    height:220px;
-}
-
-.fist{
-    position:absolute;
-    width:110px;
-    height:105px;
-    background:linear-gradient(145deg,#d28a5c,#754329);
-    border:4px solid #4d2a1a;
-    border-radius:45%;
-}
-
-.fist1{
-    left:20px;
-    bottom:20px;
-    transform:rotate(-20deg);
-}
-
-.fist2{
-    right:10px;
-    bottom:10px;
-    transform:rotate(20deg);
-}
-
-.grenade{
-    position:absolute;
-    right:120px;
-    bottom:60px;
-    width:80px;
-    height:120px;
-}
-
-.grenadeBody{
-    position:absolute;
-    bottom:0;
-    left:5px;
-    width:70px;
-    height:85px;
-    border-radius:45%;
-    background:radial-gradient(circle at 30% 25%,#687566,#182018);
-}
-
-.grenadeTop{
-    position:absolute;
-    left:27px;
-    top:10px;
-    width:30px;
-    height:30px;
-    background:#222;
-}
-
-.hidden{
-    display:none;
+display:block;margin:25px auto;
+padding:12px 25px;
+background:#444;color:white;
+border:0;
+border-radius:8px;
+cursor:pointer
 }
 </style>
 </head>
@@ -1335,7 +293,8 @@ R = Reload<br>
 4 = Grenade
 </div>
 
-<button id="caseButton" onclick="openCaseMenu()">🗃️ SKIN CASES</button>
+<button id="caseButton" onclick="openCases()">🗃️ SKIN CASES</button>
+
 <div id="keys">🔑 100 Keys</div>
 
 <div id="message">Ready!</div>
@@ -1373,38 +332,48 @@ R = Reload<br>
 </div>
 </div>
 
+
 <!-- CASE MENU -->
 
 <div id="caseMenu">
 
 <h1>🗃️ SKIN CASES</h1>
 
-<div id="caseBox">
-<div id="caseIcon">🎁</div>
-<div id="caseName">Rival Case</div>
-<div id="casePrice">🔑 10 Keys</div>
+<div class="caseBox">
 
-<button id="openCase" class="caseBtn" onclick="openSkinCase()">
+<div class="caseIcon">🎁</div>
+
+<h2>Rival Case</h2>
+
+<div class="casePrice">🔑 10 Keys</div>
+
+<button class="caseBtn openBtn" onclick="openCase()">
 OPEN CASE
 </button>
 
-<button id="inventoryBtn" class="caseBtn" onclick="openInventory()">
-INVENTORY
+<button class="caseBtn inventoryBtn" onclick="showInventory()">
+🎒 INVENTORY
 </button>
 
-<button id="closeCase" class="caseBtn" onclick="closeCaseMenu()">
+<button class="caseBtn closeBtn" onclick="closeCases()">
 CLOSE
 </button>
+
 </div>
 
 </div>
+
 
 <!-- OPENING -->
 
 <div id="opening">
+
 <div id="openingCase">🎁</div>
+
 <div id="rolling">Opening...</div>
+
 </div>
+
 
 <!-- INVENTORY -->
 
@@ -1415,256 +384,192 @@ CLOSE
 <div id="skinGrid"></div>
 
 <button id="closeInventory" onclick="closeInventory()">
-CLOSE INVENTORY
+CLOSE
 </button>
 
 </div>
 
+
 <script>
 
-/* =========================
-   CANVAS
-========================= */
+/* GAME */
 
 const canvas=document.getElementById("game");
 const ctx=canvas.getContext("2d");
 
 function resize(){
-    canvas.width=innerWidth;
-    canvas.height=innerHeight;
+canvas.width=innerWidth;
+canvas.height=innerHeight
 }
 
 resize();
 addEventListener("resize",resize);
 
-
-/* =========================
-   PLAYER
-========================= */
-
 const player={
-    x:0,
-    y:0,
-    angle:0,
-    speed:4
+x:0,y:0,angle:0,speed:4
 };
 
 const pressed={};
 
 addEventListener("keydown",e=>{
 
-    pressed[e.key.toLowerCase()]=true;
+pressed[e.key.toLowerCase()]=true;
 
-    if(e.key==="1")equip(0);
-    if(e.key==="2")equip(1);
-    if(e.key==="3")equip(2);
-    if(e.key==="4")equip(3);
-
-    if(e.key.toLowerCase()==="r")reload();
+if(e.key==="1")equip(0);
+if(e.key==="2")equip(1);
+if(e.key==="3")equip(2);
+if(e.key==="4")equip(3);
+if(e.key.toLowerCase()==="r")reload();
 
 });
 
 addEventListener("keyup",e=>{
-    pressed[e.key.toLowerCase()]=false;
+pressed[e.key.toLowerCase()]=false
 });
 
-
-/* =========================
-   MOUSE
-========================= */
-
 addEventListener("mousemove",e=>{
-    player.angle+=e.movementX*.003;
+player.angle+=e.movementX*.003
 });
 
 addEventListener("click",e=>{
 
-    if(e.target.closest("#caseMenu") ||
-       e.target.closest("#inventory") ||
-       e.target.closest("#caseButton")) return;
+if(e.target.closest("#caseMenu"))return;
+if(e.target.closest("#inventory"))return;
+if(e.target.closest("#caseButton"))return;
 
-    shoot();
+shoot();
+
 });
 
 
-/* =========================
-   WEAPONS
-========================= */
+/* WEAPONS */
 
 const weapons=[
-{
-name:"AR",
-ammo:30,
-maxAmmo:30,
-damage:25,
-delay:120
-},
-{
-name:"Handgun",
-ammo:12,
-maxAmmo:12,
-damage:40,
-delay:300
-},
-{
-name:"Fists",
-ammo:Infinity,
-maxAmmo:Infinity,
-damage:30,
-delay:400
-},
-{
-name:"Grenade",
-ammo:3,
-maxAmmo:3,
-damage:100,
-delay:800
-}
+{name:"AR",ammo:30,maxAmmo:30,damage:25,delay:120},
+{name:"Handgun",ammo:12,maxAmmo:12,damage:40,delay:300},
+{name:"Fists",ammo:Infinity,maxAmmo:Infinity,damage:30,delay:400},
+{name:"Grenade",ammo:3,maxAmmo:3,damage:100,delay:800}
 ];
 
 let current=0;
 let ready=true;
 
-
-/* =========================
-   WEAPON EQUIP
-========================= */
-
 function equip(index){
 
-    current=index;
+current=index;
 
-    document.querySelector("#ar").classList.add("hidden");
-    document.querySelector("#handgun").classList.add("hidden");
-    document.querySelector("#fists").classList.add("hidden");
-    document.querySelector("#grenade").classList.add("hidden");
+["ar","handgun","fists","grenade"].forEach(id=>{
+document.getElementById(id).classList.add("hidden")
+});
 
-    const ids=[
-        "ar",
-        "handgun",
-        "fists",
-        "grenade"
-    ];
+document.getElementById(
+["ar","handgun","fists","grenade"][index]
+).classList.remove("hidden");
 
-    document.querySelector("#"+ids[index])
-        .classList.remove("hidden");
+updateHUD();
 
-    updateHUD();
-    message("Equipped "+weapons[index].name);
 }
-
-
-/* =========================
-   SHOOTING
-========================= */
 
 function shoot(){
 
-    if(!ready)return;
+if(!ready)return;
 
-    const weapon=weapons[current];
+const w=weapons[current];
 
-    if(weapon.ammo<=0){
-        message("OUT OF AMMO — PRESS R");
-        return;
-    }
+if(w.ammo<=0){
+message("OUT OF AMMO — PRESS R");
+return
+}
 
-    ready=false;
+ready=false;
 
-    if(weapon.ammo!==Infinity)
-        weapon.ammo--;
+if(w.ammo!==Infinity)w.ammo--;
 
-    if(current===0 || current===1)
-        gunShot();
+if(current===0||current===1)gunShot();
+if(current===2)punch();
+if(current===3)grenadeThrow();
 
-    if(current===2)
-        punch();
+updateHUD();
 
-    if(current===3)
-        grenadeThrow();
+setTimeout(()=>ready=true,w.delay);
 
-    updateHUD();
-
-    setTimeout(()=>{
-        ready=true;
-    },weapon.delay);
 }
 
 function reload(){
 
-    const weapon=weapons[current];
+const w=weapons[current];
 
-    if(weapon.ammo===Infinity)return;
+if(w.ammo===Infinity)return;
 
-    weapon.ammo=weapon.maxAmmo;
+w.ammo=w.maxAmmo;
+message("RELOADED");
+updateHUD();
 
-    message("RELOADED");
-    updateHUD();
 }
 
 function gunShot(){
 
-    hitEnemy(weapons[current].damage);
+hitEnemy(weapons[current].damage);
 
-    const gun=document.querySelector(
-        current===0 ? "#ar":"#handgun"
-    );
+const gun=document.getElementById(
+current===0?"ar":"handgun"
+);
 
-    gun.style.transform="translateX(12px) rotate(-5deg)";
+gun.style.transform="translateX(10px) rotate(-5deg)";
 
-    setTimeout(()=>{
-        gun.style.transform="";
-    },60);
+setTimeout(()=>gun.style.transform="",60);
+
 }
 
 function punch(){
 
-    message("PUNCH!");
+message("PUNCH!");
 
-    for(const enemy of enemies){
+for(const e of enemies){
 
-        if(!enemy.alive)continue;
+if(!e.alive)continue;
 
-        const dx=enemy.x-player.x;
-        const dy=enemy.y-player.y;
+if(Math.hypot(e.x-player.x,e.y-player.y)<70){
 
-        if(Math.hypot(dx,dy)<90){
+e.health-=30;
 
-            enemy.health-=30;
+if(e.health<=0){
+e.alive=false;
+earnKeys(10);
+message("+10 KEYS");
+}
 
-            if(enemy.health<=0){
-                enemy.alive=false;
-                message("+10 KEYS");
-                keys+=10;
-                updateKeys();
-            }
-        }
-    }
+}
+
+}
+
 }
 
 function grenadeThrow(){
 
-    message("BOOM!");
+message("BOOM!");
 
-    for(const enemy of enemies){
+for(const e of enemies){
 
-        if(!enemy.alive)continue;
+if(!e.alive)continue;
 
-        const dx=enemy.x-player.x;
-        const dy=enemy.y-player.y;
+if(Math.hypot(e.x-player.x,e.y-player.y)<200){
 
-        if(Math.hypot(dx,dy)<250)
-            enemy.health-=100;
+e.health-=100;
 
-        if(enemy.health<=0)
-            enemy.alive=false;
-    }
+if(e.health<=0){
+e.alive=false;
+earnKeys(10);
+}
+
+}
+
+}
+
 }
 
 
-/* =========================
-   ENEMIES
-========================= */
+/* ENEMIES */
 
 const enemies=[
 {x:250,y:50,health:100,alive:true},
@@ -1673,517 +578,564 @@ const enemies=[
 {x:-100,y:-300,health:100,alive:true}
 ];
 
+
+/* SMALL HITBOX */
+
 function hitEnemy(damage){
 
-    let target=null;
-    let best=Infinity;
+let target=null;
+let best=Infinity;
 
-    for(const enemy of enemies){
+for(const e of enemies){
 
-        if(!enemy.alive)continue;
+if(!e.alive)continue;
 
-        const dx=enemy.x-player.x;
-        const dy=enemy.y-player.y;
+const dx=e.x-player.x;
+const dy=e.y-player.y;
 
-        const distance=Math.hypot(dx,dy);
+const distance=Math.hypot(dx,dy);
 
-        if(distance>500)continue;
+if(distance>400)continue;
 
-        const angle=Math.atan2(dy,dx);
+const angle=Math.atan2(dy,dx);
 
-        let difference=angle-player.angle;
+let difference=angle-player.angle;
 
-        while(difference>Math.PI)
-            difference-=Math.PI*2;
+while(difference>Math.PI)
+difference-=Math.PI*2;
 
-        while(difference<-Math.PI)
-            difference+=Math.PI*2;
+while(difference<-Math.PI)
+difference+=Math.PI*2;
 
-        if(Math.abs(difference)<.12 && distance<best){
+/* MUCH SMALLER AIM HITBOX */
 
-            best=distance;
-            target=enemy;
-        }
-    }
+if(
+Math.abs(difference)<0.045 &&
+distance<best
+){
 
-    if(target){
+best=distance;
+target=e;
 
-        target.health-=damage;
-        showHit();
+}
 
-        if(target.health<=0){
+}
 
-            target.alive=false;
+if(target){
 
-            keys+=10;
-            updateKeys();
+target.health-=damage;
 
-            message("ELIMINATION! +10 KEYS");
+showHit();
 
-        }else{
-            message("HIT -"+damage);
-        }
-    }
+if(target.health<=0){
+
+target.alive=false;
+
+earnKeys(10);
+
+message("ELIMINATION! +10 KEYS");
+
+}else{
+
+message("HIT -"+damage);
+
+}
+
+}
+
 }
 
 
-/* =========================
-   MOVEMENT
-========================= */
+/* MOVEMENT */
 
 function movement(){
 
-    let x=0;
-    let y=0;
+let x=0,y=0;
 
-    if(pressed.w){
-        x+=Math.cos(player.angle);
-        y+=Math.sin(player.angle);
-    }
+if(pressed.w){
+x+=Math.cos(player.angle);
+y+=Math.sin(player.angle)
+}
 
-    if(pressed.s){
-        x-=Math.cos(player.angle);
-        y-=Math.sin(player.angle);
-    }
+if(pressed.s){
+x-=Math.cos(player.angle);
+y-=Math.sin(player.angle)
+}
 
-    if(pressed.a){
-        x+=Math.cos(player.angle-Math.PI/2);
-        y+=Math.sin(player.angle-Math.PI/2);
-    }
+if(pressed.a){
+x+=Math.cos(player.angle-Math.PI/2);
+y+=Math.sin(player.angle-Math.PI/2)
+}
 
-    if(pressed.d){
-        x+=Math.cos(player.angle+Math.PI/2);
-        y+=Math.sin(player.angle+Math.PI/2);
-    }
+if(pressed.d){
+x+=Math.cos(player.angle+Math.PI/2);
+y+=Math.sin(player.angle+Math.PI/2)
+}
 
-    const length=Math.hypot(x,y);
+const len=Math.hypot(x,y);
 
-    if(length){
+if(len){
+x/=len;
+y/=len;
+player.x+=x*player.speed;
+player.y+=y*player.speed
+}
 
-        x/=length;
-        y/=length;
-
-        player.x+=x*player.speed;
-        player.y+=y*player.speed;
-    }
 }
 
 
-/* =========================
-   WORLD
-========================= */
+/* WORLD */
 
 function drawWorld(){
 
-    ctx.clearRect(0,0,canvas.width,canvas.height);
+ctx.clearRect(0,0,canvas.width,canvas.height);
 
-    ctx.fillStyle="#202631";
+ctx.fillStyle="#202631";
+ctx.fillRect(0,0,canvas.width,canvas.height/2);
 
-    ctx.fillRect(
-        0,
-        0,
-        canvas.width,
-        canvas.height/2
-    );
+ctx.fillStyle="#34383d";
+ctx.fillRect(
+0,canvas.height/2,
+canvas.width,canvas.height/2
+);
 
-    ctx.fillStyle="#34383d";
+ctx.fillStyle="#111";
+ctx.fillRect(
+0,canvas.height/2-3,
+canvas.width,6
+);
 
-    ctx.fillRect(
-        0,
-        canvas.height/2,
-        canvas.width,
-        canvas.height/2
-    );
+ctx.strokeStyle="rgba(255,255,255,.08)";
 
-    ctx.fillStyle="#111";
+for(let i=1;i<18;i++){
 
-    ctx.fillRect(
-        0,
-        canvas.height/2-3,
-        canvas.width,
-        6
-    );
+const y=
+canvas.height/2+
+Math.pow(i/18,1.7)*canvas.height/2;
 
-    ctx.strokeStyle="rgba(255,255,255,.08)";
+ctx.beginPath();
+ctx.moveTo(0,y);
+ctx.lineTo(canvas.width,y);
+ctx.stroke();
 
-    for(let i=1;i<18;i++){
+}
 
-        const y=
-            canvas.height/2+
-            Math.pow(i/18,1.7)*
-            canvas.height/2;
+drawEnemies();
 
-        ctx.beginPath();
-        ctx.moveTo(0,y);
-        ctx.lineTo(canvas.width,y);
-        ctx.stroke();
-    }
-
-    drawEnemies();
 }
 
 
-/* =========================
-   ENEMIES RENDER
-========================= */
+/* SMALLER ENEMY */
 
 function drawEnemies(){
 
-    for(const enemy of enemies){
+for(const e of enemies){
 
-        if(!enemy.alive)continue;
+if(!e.alive)continue;
 
-        const dx=enemy.x-player.x;
-        const dy=enemy.y-player.y;
+const dx=e.x-player.x;
+const dy=e.y-player.y;
 
-        const distance=Math.hypot(dx,dy);
+const distance=Math.hypot(dx,dy);
 
-        if(distance<10)continue;
+if(distance<10)continue;
 
-        let angle=Math.atan2(dy,dx)-player.angle;
+let angle=Math.atan2(dy,dx)-player.angle;
 
-        while(angle>Math.PI)
-            angle-=Math.PI*2;
+while(angle>Math.PI)
+angle-=Math.PI*2;
 
-        while(angle<-Math.PI)
-            angle+=Math.PI*2;
+while(angle<-Math.PI)
+angle+=Math.PI*2;
 
-        if(Math.abs(angle)>.8)continue;
+if(Math.abs(angle)>.8)continue;
 
-        const screenX=
-            canvas.width/2+
-            angle*canvas.width;
+const screenX=
+canvas.width/2+
+angle*canvas.width;
 
-        const size=Math.max(
-            25,
-            5000/distance
-        );
+const size=Math.max(
+16,
+3500/distance
+);
 
-        const bottom=
-            canvas.height/2+
-            10000/distance;
+const bottom=
+canvas.height/2+
+10000/distance;
 
-        ctx.fillStyle="#c93434";
+/* body */
 
-        ctx.fillRect(
-            screenX-size/3,
-            bottom-size,
-            size*.66,
-            size
-        );
+ctx.fillStyle="#c93434";
 
-        ctx.fillStyle="#d99570";
+ctx.fillRect(
+screenX-size/3,
+bottom-size,
+size*.66,
+size
+);
 
-        ctx.beginPath();
+/* head */
 
-        ctx.arc(
-            screenX,
-            bottom-size*1.15,
-            size*.28,
-            0,
-            Math.PI*2
-        );
+ctx.fillStyle="#d99570";
 
-        ctx.fill();
+ctx.beginPath();
 
-        ctx.fillStyle="#111";
+ctx.arc(
+screenX,
+bottom-size*1.15,
+size*.25,
+0,
+Math.PI*2
+);
 
-        ctx.fillRect(
-            screenX-size/2,
-            bottom-size*1.55,
-            size,
-            7
-        );
+ctx.fill();
 
-        ctx.fillStyle="#37db63";
+/* health */
 
-        ctx.fillRect(
-            screenX-size/2,
-            bottom-size*1.55,
-            size*(enemy.health/100),
-            7
-        );
-    }
+ctx.fillStyle="#111";
+
+ctx.fillRect(
+screenX-size/2,
+bottom-size*1.55,
+size,
+5
+);
+
+ctx.fillStyle="#37db63";
+
+ctx.fillRect(
+screenX-size/2,
+bottom-size*1.55,
+size*(e.health/100),
+5
+);
+
+}
+
 }
 
 
-/* =========================
-   HUD
-========================= */
+/* HUD */
 
 function updateHUD(){
 
-    const weapon=weapons[current];
+const w=weapons[current];
 
-    document.querySelector("#weaponName")
-        .textContent=weapon.name;
+document.getElementById("weaponName").textContent=w.name;
 
-    document.querySelector("#ammo")
-        .textContent=
-        weapon.ammo===Infinity
-        ?"∞"
-        :weapon.ammo+" / "+weapon.maxAmmo;
+document.getElementById("ammo").textContent=
+w.ammo===Infinity
+?"∞"
+:w.ammo+" / "+w.maxAmmo;
+
 }
 
 function message(text){
 
-    const box=document.querySelector("#message");
+const box=document.getElementById("message");
 
-    box.textContent=text;
+box.textContent=text;
 
-    clearTimeout(message.timer);
+clearTimeout(message.timer);
 
-    message.timer=setTimeout(()=>{
-        box.textContent="RivalStrike";
-    },1000);
+message.timer=setTimeout(()=>{
+box.textContent="RivalStrike"
+},1000);
+
 }
 
 function showHit(){
 
-    const hit=document.querySelector("#hitmarker");
+const h=document.getElementById("hitmarker");
 
-    hit.classList.remove("hit");
+h.classList.remove("hit");
 
-    void hit.offsetWidth;
+void h.offsetWidth;
 
-    hit.classList.add("hit");
+h.classList.add("hit");
+
 }
 
 
-/* =====================================================
-   SKIN CASE SYSTEM
-===================================================== */
+/* KEYS */
 
 let keys=100;
 
-const skins=[
-    {
-        name:"Default",
-        rarity:"Common",
-        icon:"🔫",
-        className:"skinCommon"
-    },
-    {
-        name:"Blue Strike",
-        rarity:"Rare",
-        icon:"🔵",
-        className:"skinRare"
-    },
-    {
-        name:"Neon Pulse",
-        rarity:"Rare",
-        icon:"🟣",
-        className:"skinRare"
-    },
-    {
-        name:"Shadow",
-        rarity:"Epic",
-        icon:"🌑",
-        className:"skinEpic"
-    },
-    {
-        name:"Cyber",
-        rarity:"Epic",
-        icon:"⚡",
-        className:"skinEpic"
-    },
-    {
-        name:"Golden Rival",
-        rarity:"Legendary",
-        icon:"👑",
-        className:"skinLegendary"
-    }
-];
-
-let inventorySkins=[
-    skins[0]
-];
-
 function updateKeys(){
 
-    document.querySelector("#keys").textContent=
-        "🔑 "+keys+" Keys";
+document.getElementById("keys").textContent=
+"🔑 "+keys+" Keys";
+
 }
 
-function openCaseMenu(){
+function earnKeys(amount){
 
-    document.querySelector("#caseMenu").style.display="block";
-}
+keys+=amount;
+updateKeys();
 
-function closeCaseMenu(){
-
-    document.querySelector("#caseMenu").style.display="none";
-}
-
-function openSkinCase(){
-
-    const price=10;
-
-    if(keys<price){
-
-        message("NOT ENOUGH KEYS");
-        return;
-    }
-
-    keys-=price;
-    updateKeys();
-
-    closeCaseMenu();
-
-    const opening=document.querySelector("#opening");
-    const rolling=document.querySelector("#rolling");
-
-    opening.style.display="flex";
-
-    rolling.textContent="Opening case...";
-
-    let count=0;
-
-    const animation=setInterval(()=>{
-
-        const randomSkin=
-            skins[Math.floor(Math.random()*skins.length)];
-
-        rolling.textContent=
-            randomSkin.icon+" "+randomSkin.name;
-
-        count++;
-
-        if(count>=12){
-
-            clearInterval(animation);
-
-            setTimeout(()=>{
-
-                const won=getRandomSkin();
-
-                addSkin(won);
-
-                rolling.textContent=
-                    "YOU GOT: "+
-                    won.icon+" "+
-                    won.name+
-                    " ["+
-                    won.rarity+
-                    "]";
-
-                setTimeout(()=>{
-
-                    opening.style.display="none";
-
-                    openInventory();
-
-                },1800);
-
-            },300);
-        }
-
-    },120);
-}
-
-function getRandomSkin(){
-
-    const roll=Math.random()*100;
-
-    if(roll<55)
-        return skins[0];
-
-    if(roll<80)
-        return skins[Math.random()<.5?1:2];
-
-    if(roll<95)
-        return skins[Math.random()<.5?3:4];
-
-    return skins[5];
-}
-
-function addSkin(skin){
-
-    inventorySkins.push(skin);
-}
-
-function openInventory(){
-
-    document.querySelector("#caseMenu").style.display="none";
-
-    document.querySelector("#inventory").style.display="block";
-
-    renderInventory();
-}
-
-function closeInventory(){
-
-    document.querySelector("#inventory").style.display="none";
-}
-
-function renderInventory(){
-
-    const grid=document.querySelector("#skinGrid");
-
-    grid.innerHTML="";
-
-    inventorySkins.forEach((skin,index)=>{
-
-        const card=document.createElement("div");
-
-        card.className=
-            "skinCard "+
-            skin.className;
-
-        card.innerHTML=`
-
-            <div class="skinIcon">
-                ${skin.icon}
-            </div>
-
-            <b>${skin.name}</b>
-
-            <br>
-
-            <small>${skin.rarity}</small>
-
-            <br><br>
-
-            <button class="equipSkin"
-            onclick="equipSkin(${index})">
-            EQUIP
-            </button>
-        `;
-
-        grid.appendChild(card);
-    });
-}
-
-function equipSkin(index){
-
-    const skin=inventorySkins[index];
-
-    message("EQUIPPED "+skin.name);
-
-    /*
-       Change the weapon appearance based
-       on the equipped skin.
-    */
-
-    if(skin.rarity==="Legendary"){
-
-        document.querySelector("#arBody").style.background=
-            "linear-gradient(145deg,#ffd84a,#8a6500)";
-    }
 }
 
 
 /* =========================
-   GAME LOOP
+   SKIN CASES
 ========================= */
+
+const skins=[
+
+{
+name:"Default",
+rarity:"Common",
+icon:"🔫",
+className:"common"
+},
+
+{
+name:"Blue Strike",
+rarity:"Rare",
+icon:"🔵",
+className:"rare"
+},
+
+{
+name:"Neon Pulse",
+rarity:"Rare",
+icon:"🟣",
+className:"rare"
+},
+
+{
+name:"Shadow",
+rarity:"Epic",
+icon:"🌑",
+className:"epic"
+},
+
+{
+name:"Cyber",
+rarity:"Epic",
+icon:"⚡",
+className:"epic"
+},
+
+{
+name:"Golden Rival",
+rarity:"Legendary",
+icon:"👑",
+className:"legendary"
+}
+
+];
+
+let inventory=[skins[0]];
+
+
+/* CASE MENU */
+
+function openCases(){
+
+document.getElementById("caseMenu").style.display="block";
+
+}
+
+function closeCases(){
+
+document.getElementById("caseMenu").style.display="none";
+
+}
+
+
+/* OPEN CASE */
+
+function openCase(){
+
+if(keys<10){
+
+alert("You need 10 Keys!");
+
+return;
+
+}
+
+keys-=10;
+updateKeys();
+
+closeCases();
+
+const opening=document.getElementById("opening");
+const rolling=document.getElementById("rolling");
+
+opening.style.display="flex";
+
+let count=0;
+
+const spin=setInterval(()=>{
+
+const random=
+skins[Math.floor(Math.random()*skins.length)];
+
+rolling.textContent=
+random.icon+" "+random.name;
+
+count++;
+
+if(count>=15){
+
+clearInterval(spin);
+
+setTimeout(()=>{
+
+const won=getSkin();
+
+inventory.push(won);
+
+rolling.textContent=
+"YOU GOT "+won.icon+" "+won.name+
+" — "+won.rarity;
+
+setTimeout(()=>{
+
+opening.style.display="none";
+showInventory();
+
+},1600);
+
+},300);
+
+}
+
+},100);
+
+}
+
+
+/* DROP CHANCES */
+
+function getSkin(){
+
+const roll=Math.random()*100;
+
+if(roll<55)return skins[0];
+
+if(roll<80)
+return Math.random()<.5?skins[1]:skins[2];
+
+if(roll<95)
+return Math.random()<.5?skins[3]:skins[4];
+
+return skins[5];
+
+}
+
+
+/* INVENTORY */
+
+function showInventory(){
+
+document.getElementById("caseMenu").style.display="none";
+
+document.getElementById("inventory").style.display="block";
+
+renderInventory();
+
+}
+
+function closeInventory(){
+
+document.getElementById("inventory").style.display="none";
+
+}
+
+function renderInventory(){
+
+const grid=document.getElementById("skinGrid");
+
+grid.innerHTML="";
+
+inventory.forEach((skin,index)=>{
+
+const card=document.createElement("div");
+
+card.className="skin "+skin.className;
+
+card.innerHTML=`
+<div class="skinIcon">${skin.icon}</div>
+<b>${skin.name}</b><br>
+<small>${skin.rarity}</small><br>
+<button class="equip" onclick="equipSkin(${index})">
+EQUIP
+</button>
+`;
+
+grid.appendChild(card);
+
+});
+
+}
+
+function equipSkin(index){
+
+const skin=inventory[index];
+
+message("EQUIPPED "+skin.name);
+
+/* Change AR appearance */
+
+const body=document.querySelector(".arBody");
+
+if(skin.name==="Golden Rival"){
+
+body.style.background=
+"linear-gradient(145deg,#ffe45c,#8b6500)";
+
+}
+
+else if(skin.name==="Blue Strike"){
+
+body.style.background=
+"linear-gradient(145deg,#4db8ff,#102a70)";
+
+}
+
+else if(skin.name==="Neon Pulse"){
+
+body.style.background=
+"linear-gradient(145deg,#e24cff,#321060)";
+
+}
+
+else if(skin.name==="Shadow"){
+
+body.style.background=
+"linear-gradient(145deg,#555,#050505)";
+
+}
+
+else if(skin.name==="Cyber"){
+
+body.style.background=
+"linear-gradient(145deg,#00eaff,#123b44)";
+
+}
+
+else{
+
+body.style.background=
+"linear-gradient(145deg,#555,#151515)";
+
+}
+
+}
+
+
+/* GAME LOOP */
 
 function gameLoop(){
 
-    movement();
+movement();
+drawWorld();
 
-    drawWorld();
+requestAnimationFrame(gameLoop);
 
-    requestAnimationFrame(gameLoop);
 }
 
 updateKeys();
@@ -2194,19 +1146,3 @@ gameLoop();
 
 </body>
 </html>
-#caseButton{
-    position:absolute;
-    top:20px;
-    right:20px;
-    z-index:50;
-    pointer-events:auto;
-    background:#7c3cff;
-    color:white;
-    border:0;
-    border-radius:10px;
-    padding:12px 18px;
-    font-size:16px;
-    font-weight:bold;
-    cursor:pointer;
-}
-     
