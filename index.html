@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>RivalStrike</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="menu">
+  <div class="panel">
+    <h1>RIVAL<span>STRIKE</span></h1>
+    <p>FAST • COMPETITIVE • ORIGINAL</p>
+    <button id="play">PLAY</button>
+    <div class="controls">
+      <b>CONTROLS</b>
+      <p>W A S D — Move</p>
+      <p>Mouse — Aim</p>
+      <p>Left Click — Shoot</p>
+      <p>R — Reload</p>
+      <p>ESC — Pause</p>
+    </div>
+  </div>
+</div>
+
+<div id="game" hidden>
+  <div id="hud">
+    <div>HP <b id="hp">100</b></div>
+    <div>KILLS <b id="kills">0</b></div>
+    <div class="ammo"><b id="ammo">12</b> / ∞</div>
+  </div>
+  <div id="crosshair">+</div>
+  <div id="message"></div>
+
+  <div id="arena">
+    <div class="floor"></div>
+    <div class="cover cover-a"></div>
+    <div class="cover cover-b"></div>
+    <div class="cover cover-c"></div>
+    <div id="player"></div>
+    <div id="bots"></div>
+  </div>
+
+  <div id="pause" hidden>
+    <div class="panel">
+      <h2>PAUSED</h2>
+      <button id="resume">RESUME</button>
+      <button id="home">MAIN MENU</button>
+    </div>
+  </div>
+</div>
+
+<script src="game.js"></script>
+</body>
+</html>
